@@ -1,0 +1,143 @@
+---
+title: "Data Analysis Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    social: [ "twitter", "facebook", "menu"]
+    source_code: embed
+---
+
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(modelr)
+library(broom)
+library(caret)
+library(rpart)
+library(ggplot2)
+library(Amelia)
+library(dplyr)
+library(data.table)
+library(tidyverse)
+```
+
+
+```{r}
+crypto_advertisement <- read.csv('~/R/R dashboards/advertising.csv')
+```
+
+
+Data Visualization
+=====================================
+
+## Row 1 {data-height=110}
+
+### Number of countries
+
+```{r}
+#unique(crypto_advertisement$Country) 
+valueBox(237, icon = "fa-ship", color="rgb(100,100,100)")
+```
+
+### Percentage of Clicks on Ad
+
+```{r}
+#table(crypto_advertisement$Clicked.on.Ad) 
+
+valueBox("50 %", icon = "fa-heart", color="rgb(200,100,100)")
+```
+
+### Income Range for users 
+
+```{r}
+#max(crypto_advertisement$Area.Income)
+
+
+valueBox("14000-79500", icon = "fa-life-ring",color="rgb(26,110,204)")
+```
+    
+
+## Row 2 {data-height=400} 
+
+### Age Distribution
+
+```{r}
+#install.packages('highcharter')
+library(highcharter) 
+
+hc <- hchart(
+  density(crypto_advertisement$Age), 
+  type = "area", name = "Users age"
+  )
+hc
+
+#hist(crypto_advertisement$Age, breaks=12, col="cyan3",xlab="Ages of Users", main='Age distribution of users')
+```
+
+
+### Internet Usage 
+```{r}
+#hist(crypto_advertisement$Daily.Internet.Usage, breaks=12, col="cyan4",xlab="Daily Internet Usage", main='Daily Internet Usage distribution of users')
+
+daily.internet.usage <- hchart(
+  crypto_advertisement$Daily.Internet.Usage,breaks=12,
+  color = "#008B8B", name = "Daily.Internet.Usage"
+  )
+daily.internet.usage
+```
+
+More Visualizations
+=====================================================
+
+
+## Row 1 
+
+### Area Income compared to time spent on site
+```{r}
+#install.packages(plotly) # if you haven't installed the package
+library(plotly)
+
+m <- ggplot(data = crypto_advertisement, aes(x = Area.Income, y = Daily.Time.Spent.on.Site)) +
+    geom_point() + # then add a layer of points
+    geom_smooth(method = "lm") # and then add a fitted line
+
+ggplotly(m) 
+
+```
+
+
+### Daily.Internet.Usage compared to time spent on site
+```{r}
+cv <- ggplot(data = crypto_advertisement, aes(x = Daily.Internet.Usage, y = Daily.Time.Spent.on.Site)) +
+    geom_point() + # then add a layer of points
+    geom_smooth(method = "lm") # and then add a fitted line
+
+ggplotly(cv) 
+
+```
+
+
+Row
+------------------------------------
+### Gender Representations
+
+```{r}
+#changing column name
+names(crypto_advertisement)[names(crypto_advertisement) == "Male"] <- "Gender"
+
+#replacing gender values
+crypto_advertisement <- within(crypto_advertisement, Gender[Gender == 0] <- 'Female')
+crypto_advertisement <- within(crypto_advertisement, Gender[Gender == 1] <- 'Male')
+
+
+pie(table(crypto_advertisement$Gender), main = "Gender Representations", 
+    col = c("darkcyan", "darkgray"), radius = 1)
+```
+
+Report
+========================================
+
+Created by: Mercy
+
+Dates :
